@@ -1,0 +1,87 @@
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope,$http)
+{
+	$scope.titleSearch = "ca";
+	$scope.sortBy = 'TitleName'
+	$scope.sortButton = "Sort by Year";
+	$scope.search = function()
+	{
+		document.getElementById("contents").style.display = "none";
+		$http.get("http://localhost:1337/"+$scope.titleSearch)
+		.then(function(response)
+		{
+			console.log(response.data);
+			console.log(response.status);
+			console.log(response.statusText);
+			$scope.titles = response.data
+		},
+		function(response)
+		{
+			console.log(response.data);
+			console.log(response.status);
+			console.log(response.statusText);
+		});
+	}
+	$scope.selectTitle = function(clickedTitle)
+	{
+		for(var t in $scope.titles)
+		{
+			if($scope.titles[t].TitleId==clickedTitle)
+			{
+				console.log($scope.selectedTitle);
+				console.log($scope.titles[t]);
+				$scope.selectedTitle = $scope.titles[t];
+				console.log($scope.selectedTitle);
+				document.getElementById("contents").style.display = "block";
+				return;
+			}
+		}
+	}
+	$scope.changeSort = function()
+	{
+		if($scope.sortBy == 'TitleName')
+		{
+			$scope.sortBy = 'ReleaseYear';
+			$scope.sortButton = "Sort by Title";
+		}
+		else
+		{
+			$scope.sortBy = 'TitleName';
+			$scope.sortButton = "Sort by Year";
+		}
+	}
+});
+	</script></head>
+<body>
+	<div ng-app="myApp" ng-controller="myCtrl">
+		<form novalidate>
+			<input type="text" ng-model="titleSearch">
+			<button ng-click="search()">search</button>
+			<button ng-click="changeSort()">{{sortButton}}</button>
+			</form>
+		<div>
+			<div>
+				<div style="background-color:#777;float:left;width:50%;height:80%;overflow-y:auto">
+					<div style="float:left;width:100%;" ng-repeat="t in titles | orderBy: sortBy">
+						<div style="height=50px;" ng-click="selectTitle(t.TitleId)">
+							<h>{{t.TitleName}}</h> <h style="float:right">{{t.ReleaseYear}}</h><br />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div style="background-color:#999;float:right;width:50%;height:80%;overflow-y:auto">
+				<div hidden id="contents">
+					<h>{{selectedTitle.TitleName}}</h>
+					<p>Year:{{selectedTitle.ReleaseYear}}</p>
+					<p>{{selectedTitle.Storylines[0].Type}}:{{selectedTitle.Storylines[0].Description}}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
